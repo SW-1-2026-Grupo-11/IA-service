@@ -1,0 +1,3 @@
+from app.schemas.alert_schema import AlertaDjango
+
+async def enviar_alerta_django(alerta: AlertaDjango) -> bool: ...
