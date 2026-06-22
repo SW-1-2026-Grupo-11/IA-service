@@ -15,6 +15,7 @@ from app.schemas.proctoring_schema import (
     JitsiEventRequest,
     WindowChangeRequest,
 )
+from app.services.debounce import reset as reset_debounce, should_emit
 from app.services.django_client import enviar_alerta_django
 from app.services.vision_service import analyze_frame
 
@@ -26,12 +27,26 @@ async def process_frame(request: FrameRequest):
     """Analiza un frame de video y genera alertas si es necesario."""
     alerta = analyze_frame(request)
 
+    # Clave del episodio por sesión (o entrevista+participante si no hay session_id).
+    key = request.session_id or f"{request.entrevista_id}:{request.participante_id}"
+
     if not alerta:
+        # Frame normal → se cierra el episodio en curso (si lo había).
+        reset_debounce(key)
         return {"success": True, "alerta": False, "mensaje": "Frame analizado sin alerta"}
 
     # Propagate session_id if present
     if request.session_id:
         alerta.evidencia_json.session_id = request.session_id
+
+    # Debounce: una condición continua (p. ej. "sin rostro") cuenta como UN episodio,
+    # no una alerta por frame. Evita inflar el riesgo con cientos de alertas idénticas.
+    if not should_emit(key, alerta.tipo_alerta):
+        return {
+            "success": True,
+            "alerta": False,
+            "mensaje": f"Alerta {alerta.tipo_alerta} agrupada (episodio en curso)",
+        }
 
     enviado = await enviar_alerta_django(alerta)
     if enviado:
@@ -80,6 +95,7 @@ async def process_jitsi_event(request: JitsiEventRequest):
     """Procesa eventos de Jitsi Meet y genera alertas para los eventos críticos."""
     eventos_alerta: dict[str, str] = {
         "camara_apagada": "media",
+        "camara_no_disponible": "alta",
         "pantalla_compartida": "alta",
         "participante_salio": "media",
     }
