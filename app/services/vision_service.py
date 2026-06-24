@@ -35,9 +35,11 @@ _OBJECT_MODEL_PATH = _MODELS_DIR / "efficientdet_lite0.tflite"
 _FACE_MODEL_PATH = _MODELS_DIR / "face_landmarker.task"
 
 # ─── Umbrales (AFINAR con pruebas reales) ────────────────────────────────────
-_PHONE_SCORE_MIN = 0.5      # antes 0.35 → subido para menos falsos celulares
-_YAW_LIMIT_DEG = 25.0       # giro horizontal de cabeza tolerado (mirar a un lado)
-_PITCH_LIMIT_DEG = 20.0     # inclinación vertical tolerada (mirar arriba/abajo)
+# Calibrados para RECLUTAMIENTO: más laxos para no acusar falsamente al candidato.
+# La persistencia (debounce) ademas exige que la condición dure unos segundos.
+_PHONE_SCORE_MIN = 0.55     # confianza mínima para "celular" (menos falsos)
+_YAW_LIMIT_DEG = 30.0       # giro horizontal de cabeza tolerado (mirar a un lado)
+_PITCH_LIMIT_DEG = 25.0     # inclinación vertical tolerada (mirar arriba/abajo)
 
 # ─── Detectores (carga lazy) ─────────────────────────────────────────────────
 _object_detector: Any = None
