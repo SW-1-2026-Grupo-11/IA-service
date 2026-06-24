@@ -1,0 +1,36 @@
+# ─── Python ───────────────────────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ─── Entornos virtuales ───────────────────────────────────
+.venv/
+venv/
+env/
+ENV/
+
+# ─── Variables de entorno / secretos ──────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Caches de herramientas ───────────────────────────────
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ─── IDE ──────────────────────────────────────────────────
+.vscode/
+.idea/
+
+# ─── Sistema operativo ────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ─── Logs ─────────────────────────────────────────────────
+*.log
+
+# NOTA: models/*.task y models/*.tflite SÍ se versionan a propósito
+# (modelos de visión MediaPipe, ~8 MB en total, necesarios en runtime).
+# El LLM grande (qwen3, 5.2 GB) NO está aquí: vive en un volumen Docker de Ollama.
